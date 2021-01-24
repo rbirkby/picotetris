@@ -78,7 +78,8 @@ int main()
   stdio_init_all();
   setup();
 
-  while (true) {
+  while (true)
+  {
     loop();
   }
 
@@ -170,13 +171,16 @@ void setup()
 
 void loop()
 {
-  if(pico_explorer.is_pressed(pico_explorer.A)) {
+  if (pico_explorer.is_pressed(pico_explorer.A))
+  {
     onLeftButton();
   }
-  if(pico_explorer.is_pressed(pico_explorer.B)) {
+  if (pico_explorer.is_pressed(pico_explorer.B))
+  {
     onRightButton();
   }
-  if(pico_explorer.is_pressed(pico_explorer.X)) {
+  if (pico_explorer.is_pressed(pico_explorer.X))
+  {
     onRotateButton();
   }
 
@@ -199,28 +203,34 @@ void loop()
   }
 }
 
-void onLeftButton() {
- if (lost) {
-   reset();
- }
+void onLeftButton()
+{
+  if (lost)
+  {
+    reset();
+  }
 
- move(LEFT);
+  move(LEFT);
 }
 
-void onRightButton() {
- if (lost) {
-   reset();
- }
+void onRightButton()
+{
+  if (lost)
+  {
+    reset();
+  }
 
- move(RIGHT);
+  move(RIGHT);
 }
 
-void onRotateButton() {
- if (lost) {
-   reset();
- }
+void onRotateButton()
+{
+  if (lost)
+  {
+    reset();
+  }
 
- rotate();
+  rotate();
 }
 
 //-------------------------------------------------------------------------
@@ -399,7 +409,7 @@ void drawCourt()
 
   if (lost)
   {
-    pico_explorer.text(" Game Over ", point(0, 20), 100);
+    pico_explorer.text(" Game Over ", Point(0, 20), 100);
     printf("Game Over\n");
   }
 }
@@ -412,7 +422,7 @@ void drawNext()
 
 void drawScore()
 {
-  pico_explorer.text(std::to_string(score), point(0, 0), 100);
+  pico_explorer.text(std::to_string(score), Point(0, 0), 100);
 }
 
 void drawPiece(unsigned int type[], int x, int y, int dir)
@@ -428,12 +438,14 @@ void drawPiece(unsigned int type[], int x, int y, int dir)
 
 void drawBlock(int x, int y)
 {
-  rect block(x * dx, y * dy, dx, dy);
+  Rect block(x * dx, y * dy, dx, dy);
   pico_explorer.rectangle(block);
 }
 
-void core1_entry() {
-  while(true) {
+void core1_entry()
+{
+  while (true)
+  {
     play_song(pico_explorer);
   }
 }
