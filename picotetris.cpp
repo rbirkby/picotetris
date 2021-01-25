@@ -13,6 +13,7 @@
 #include "pico_explorer.hpp"
 #include "picotetris.hpp"
 #include "song.cpp"
+#include "autorepeat.cpp"
 
 using namespace pimoroni;
 
@@ -33,14 +34,18 @@ enum DIR
   MAX = LEFT
 };
 
-const int nx = 10; // width of tetris court (in blocks)
-const int ny = 12; // height of tetris court (in blocks)
+// 6 blocks reserved for info area
+const int nx = 9; // width of tetris court (in blocks)
+const int ny = 15; // height of tetris court (in blocks)
+
+AutoRepeat autorepeatB, autorepeatY, autorepeatX;
 
 //-------------------------------------------------------------------------
 // game variables (initialized during reset)
 //-------------------------------------------------------------------------
 
-const int dx = (PicoExplorer::WIDTH - 24) / nx; // pixel size of a single tetris block
+// Reserve 6 blocks width for the info area
+const int dx = (PicoExplorer::WIDTH / (nx + 6)); // pixel size of a single tetris block
 const int dy = PicoExplorer::HEIGHT / ny;
 int blocks[nx][ny];  // 2 dimensional array (nx*ny) representing tetris court - either empty block or occupied by a 'piece'
 bool playing = true; // true|false - game is in progress
@@ -140,13 +145,22 @@ bool unoccupied(unsigned int type[], int x, int y, int dir)
 //-----------------------------------------
 //-----------------------------------------
 unsigned int *pieces[] = {i, j, l, o, s, t, z};
+Pen pens[] = {
+  pico_explorer.create_pen(255, 0, 0),
+  pico_explorer.create_pen(0, 255, 0),
+  pico_explorer.create_pen(0, 0, 255),
+  pico_explorer.create_pen(255, 255, 0),
+  pico_explorer.create_pen(0, 255, 255),
+  pico_explorer.create_pen(255, 0, 255),
+  pico_explorer.create_pen(255, 255, 255)
+};
 
 Piece randomPiece()
 {
   int index = rand() % 6;
   printf("New piece: %d\n", index);
 
-  Piece current = {pieces[index], 3, 0, UP};
+  Piece current = {pieces[index], 3, 0, UP, pens[index]};
   return current;
 }
 
@@ -172,20 +186,20 @@ void setup()
 
 void loop()
 {
-  if (pico_explorer.is_pressed(pico_explorer.A))
+  int time = to_ms_since_boot(get_absolute_time());
+
+  if (autorepeatB.next(time, pico_explorer.is_pressed(pico_explorer.B)))
   {
     onLeftButton();
   }
-  if (pico_explorer.is_pressed(pico_explorer.B))
+  if (autorepeatY.next(time, pico_explorer.is_pressed(pico_explorer.Y)))
   {
     onRightButton();
   }
-  if (pico_explorer.is_pressed(pico_explorer.X))
+  if (autorepeatX.next(time, pico_explorer.is_pressed(pico_explorer.X)))
   {
     onRotateButton();
   }
-
-  int time = to_ms_since_boot(get_absolute_time());
 
   if (time % 60 == 0)
   {
@@ -274,6 +288,7 @@ void reset()
 bool move(int dir)
 {
   int x = current.x, y = current.y;
+  printf("Move %d", dir);
   switch (dir)
   {
   case RIGHT:
@@ -399,8 +414,9 @@ void drawCourt()
   pico_explorer.set_pen(255, 255, 255);
 
   if (playing)
-    drawPiece(current.type, current.x + 6, current.y, current.dir);
+    drawPiece(current.type, current.x + 6, current.y, current.dir, current.pen);
 
+  pico_explorer.set_pen(255, 255, 255);
   int x, y;
   for (y = 0; y < ny; y++)
   {
@@ -413,7 +429,8 @@ void drawCourt()
 
   if (lost)
   {
-    pico_explorer.text(" Game Over ", Point(0, 20), 100);
+    pico_explorer.set_pen(255, 0, 0);
+    pico_explorer.text(" Game Over ", Point(0, 20), 240, 8);
     printf("Game Over\n");
   }
 }
@@ -421,18 +438,20 @@ void drawCourt()
 void drawNext()
 {
   if (playing)
-    drawPiece(next.type, 0, 3, next.dir);
+    drawPiece(next.type, 1, 3, next.dir, next.pen);
 }
 
 void drawScore()
 {
-  pico_explorer.text(std::to_string(score), Point(0, 0), 100);
+  pico_explorer.set_pen(255, 255, 255);
+  pico_explorer.text(std::to_string(score), Point(dx/2, dy/2), 240, 3);
 }
 
-void drawPiece(unsigned int type[], int x, int y, int dir)
+void drawPiece(unsigned int type[], int x, int y, int dir, Pen pen)
 {
   Block positionedBlocks[4];
   getPositionedBlocks(type, x, y, dir, positionedBlocks);
+  pico_explorer.set_pen(pen);
 
   for (int i = 0; i < 4; i++)
   {
