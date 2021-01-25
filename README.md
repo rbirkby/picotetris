@@ -10,7 +10,7 @@ Original JavaScript [implementation](https://github.com/jakesgordon/javascript-t
 Video
 -----
 
-{TODO: When my explorer board arrives}
+https://www.youtube.com/watch?v=YCEuKoBeN7E
 
 
 Requirements
