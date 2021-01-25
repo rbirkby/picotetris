@@ -159,7 +159,8 @@ void setup()
 {
   pico_explorer.init();
   pico_explorer.set_audio_pin(0);
-  pico_explorer.set_pen(255, 255, 255);
+  pico_explorer.set_backlight(100);
+  pico_explorer.set_pen(0, 0, 0);
 
   multicore_launch_core1(core1_entry);
 
@@ -393,7 +394,10 @@ void draw()
 
 void drawCourt()
 {
+  pico_explorer.set_pen(0, 0, 0);
   pico_explorer.clear();
+  pico_explorer.set_pen(255, 255, 255);
+
   if (playing)
     drawPiece(current.type, current.x + 6, current.y, current.dir);
 
